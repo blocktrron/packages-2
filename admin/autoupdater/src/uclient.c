@@ -151,7 +151,19 @@ ssize_t uclient_read_account(struct uclient *cl, char *buf, int len) {
 }
 
 
-int get_url(const char *url, void (*read_cb)(struct uclient *cl), void *cb_data, ssize_t len) {
+static int add_custom_headers(struct settings *s, struct uclient *cl) {
+	for (size_t i = 0; i < settings->n_custom_headers; i++) {
+		const char *name = settings->custom_headers[i].name;
+		const char *value = settings->custom_headers[i].value;
+
+		int ret = uclient_http_set_header(cl, name, value);
+		if (ret)
+			return ret;
+	}
+}
+
+
+int get_url(const char *url, void (*read_cb)(struct uclient *cl), void *cb_data, struct settings *settings, ssize_t len) {
 	struct uclient_data d = { .custom = cb_data, .length = len };
 	struct uclient_cb cb = {
 		.header_done = header_done_cb,
@@ -174,6 +186,8 @@ int get_url(const char *url, void (*read_cb)(struct uclient *cl), void *cb_data,
 	if (uclient_http_reset_headers(cl))
 		goto err;
 	if (uclient_http_set_header(cl, "User-Agent", user_agent))
+		goto err;
+	if (add_custom_headers(settings, cl))
 		goto err;
 	if (uclient_request(cl))
 		goto err;

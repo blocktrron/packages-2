@@ -29,6 +29,11 @@
 #include <ecdsautil/ecdsa.h>
 
 
+struct custom_header {
+	const char *name;
+	const char *value;
+};
+
 struct settings {
 	bool force;
 	bool fallback;
@@ -40,6 +45,9 @@ struct settings {
 
 	size_t n_mirrors;
 	const char **mirrors;
+
+	size_t n_custom_headers;
+	struct custom_header *custom_headers;
 
 	size_t n_pubkeys;
 	ecc_25519_work_t *pubkeys;

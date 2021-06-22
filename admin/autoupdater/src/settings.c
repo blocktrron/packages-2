@@ -180,5 +180,39 @@ pubkey_fail:
 	}
 	settings->n_pubkeys -= ignored_keys;
 
+	struct uci_element *e;
+
+	/* Load custom HTTP headers */
+	uci_foreach_element(&p->sections, e) {
+		struct uci_section *s = uci_to_section(e);
+
+		if (strcmp(s->type, "header"))
+			continue;
+
+		const char *name = uci_lookup_option_string(ctx, s, "name");
+		const char *value = uci_lookup_option_string(ctx, s, "value");
+
+		if (!name) {
+			fprintf(stderr, "autoupdater: warning: missing name for custom HTTP header");
+			continue;
+		}
+
+		if (strchr(name, ' ')) {
+			fprintf(stderr, "autoupdater: warning: invalid HTTP header name");
+			continue;
+		}
+
+		if (!value) {
+			fprintf(stderr, "autoupdater: warning: missing value for custom HTTP header");
+			continue;
+		}
+
+		settings->n_custom_headers++;
+		settings->custom_headers = safe_realloc(settings->custom_headers,
+							settings->n_custom_headers * sizeof(struct custom_header));
+		settings->custom_headers[settings->n_custom_headers - 1].name = name;
+		settings->custom_headers[settings->n_custom_headers - 1].value = value;
+	}
+
 	/* Don't free UCI context, we still reference values from it */
 }
