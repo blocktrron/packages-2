@@ -4,4 +4,11 @@
 #include <stdint.h>
 #include <json-c/json.h>
 
-__attribute__((visibility("hidden"))) bool get_airtime(struct json_object *result, int ifx);
+struct airtime_data {
+	struct json_object *parent_json;
+
+	int ifx;
+	int wiphy;
+}
+
+__attribute__((visibility("hidden"))) bool get_airtime(struct airtime_data *data);

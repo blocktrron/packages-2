@@ -67,7 +67,8 @@ static const char const* msg_names[NL80211_SURVEY_INFO_MAX + 1] = {
 };
 
 static int survey_airtime_handler(struct nl_msg *msg, void *arg) {
-	struct json_object *parent_json = (struct json_object *) arg;
+	struct airtime_data *data = (struct airtime_data *) arg;
+	struct json_object *parent_json = arg->parent_json;
 
 	struct genlmsghdr *gnlh = nlmsg_data(nlmsg_hdr(msg));
 	struct nlattr *survey_info = nla_find(genlmsg_attrdata(gnlh, 0), genlmsg_attrlen(gnlh, 0), NL80211_ATTR_SURVEY_INFO);
@@ -129,6 +130,8 @@ static int survey_airtime_handler(struct nl_msg *msg, void *arg) {
 			json_object_object_add(freq_json, msg_names[type], data_json);
 	}
 
+	json_object_object_add(freq_json, "phy", json_object_new_int(data->wiphy));
+
 	if (req_fields == 3)
 		json_object_array_add(parent_json, freq_json);
 	else
@@ -138,6 +141,6 @@ abort:
 	return NL_SKIP;
 }
 
-bool get_airtime(struct json_object *result, int ifx) {
-	return nl_send_dump(survey_airtime_handler, result, NL80211_CMD_GET_SURVEY, ifx);
+bool get_airtime(struct airtime_data *data) {
+	return nl_send_dump(survey_airtime_handler, data, NL80211_CMD_GET_SURVEY, data->ifx);
 }

@@ -7,10 +7,9 @@
 #include "ifaces.h"
 
 static struct json_object *respondd_provider_statistics(void) {
-	bool ok;
-	int newest_element_index;
-	struct json_object *last, *result, *wireless;
+	struct json_object *result, *wireless;
 	struct iface_list *ifaces;
+	struct airtime_data at_data;
 
 	result = json_object_new_object();
 	if (!result)
@@ -22,15 +21,14 @@ static struct json_object *respondd_provider_statistics(void) {
 		return NULL;
 	}
 
+	at_data.parent_json = wireless;
+
 	ifaces = get_ifaces();
 	while (ifaces != NULL) {
-		ok = get_airtime(wireless, ifaces->ifx);
-		if (ok) {
-			newest_element_index = json_object_array_length(wireless) - 1;
-			last = json_object_array_get_idx(wireless, newest_element_index);
-			if (last)
-				json_object_object_add(last, "phy", json_object_new_int(ifaces->wiphy));
-		}
+		at_data.ifx = ifaces->ifx;
+		at_data.wiphy = ifaces->wiphy;
+		
+		get_airtime(&at_data);
 		void *freeptr = ifaces;
 		ifaces = ifaces->next;
 		free(freeptr);
