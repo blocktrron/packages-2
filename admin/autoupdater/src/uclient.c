@@ -152,14 +152,16 @@ ssize_t uclient_read_account(struct uclient *cl, char *buf, int len) {
 
 
 static int add_custom_headers(struct settings *s, struct uclient *cl) {
-	for (size_t i = 0; i < settings->n_custom_headers; i++) {
-		const char *name = settings->custom_headers[i].name;
-		const char *value = settings->custom_headers[i].value;
+	for (size_t i = 0; i < s->n_custom_headers; i++) {
+		const char *name = s->custom_headers[i].name;
+		const char *value = s->custom_headers[i].value;
 
 		int ret = uclient_http_set_header(cl, name, value);
 		if (ret)
 			return ret;
 	}
+
+	return 0;
 }
 
 

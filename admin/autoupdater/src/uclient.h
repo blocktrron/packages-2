@@ -24,6 +24,7 @@
 */
 #pragma once
 
+#include "settings.h"
 
 #include <libubox/uclient.h>
 #include <sys/types.h>
@@ -50,5 +51,5 @@ inline void * uclient_get_custom(struct uclient *cl) {
 
 ssize_t uclient_read_account(struct uclient *cl, char *buf, int len);
 
-int get_url(const char *url, void (*read_cb)(struct uclient *cl), void *cb_data, ssize_t len);
+int get_url(const char *url, void (*read_cb)(struct uclient *cl), void *cb_data, struct settings *settings, ssize_t len);
 const char *uclient_get_errmsg(int code);
